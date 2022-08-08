@@ -282,7 +282,6 @@
 package com.spd.hardware;
 
 
-import android.annotation.NonNull;
 
 import java.io.File;
 
@@ -297,7 +296,7 @@ public interface ISerialPortListener {
      *
      * @param device 串口路径信息
      */
-    default void onOpenSuccess(@NonNull File device) {
+    default void onOpenSuccess(File device) {
 
     }
 
@@ -306,7 +305,7 @@ public interface ISerialPortListener {
      *
      * @param e 错误信息
      */
-    default void onOpenFailed(@NonNull Exception e) {
+    default void onOpenFailed(Exception e) {
 
     }
 
@@ -315,13 +314,13 @@ public interface ISerialPortListener {
      *
      * @param bytes 接收数据
      */
-    void onDataReceived(@NonNull byte[] bytes);
+    void onDataReceived(byte[] bytes);
 
     /**
      * 串口发送的数据
      *
      * @param bytes 已发送数据
      */
-    default void onDataSend(@NonNull byte[] bytes) {
+    default void onDataSend(byte[] bytes) {
     }
 }
