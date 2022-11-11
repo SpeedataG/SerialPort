@@ -318,7 +318,7 @@ public class SerialManager {
      * @param listener 回调
      */
     public void open(String device, int speed, ISerialPortListener listener) {
-        open(device, speed, 8, 1, 0, 0, 0, listener);
+        open(device, speed, 8, 2, 0, 0, 0, listener);
     }
 
     /**

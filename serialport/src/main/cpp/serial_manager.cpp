@@ -287,6 +287,7 @@
 
 #include "android/log.h"
 
+
 static speed_t getBaudRate(jint baudRate) {
     switch (baudRate) {
         case 0:
@@ -358,117 +359,135 @@ static speed_t getBaudRate(jint baudRate) {
 
 extern "C"
 JNIEXPORT jobject JNICALL
-Java_com_spd_hardware_SerialManager_nativeOpen(JNIEnv *env, jobject/* thiz */, jstring path, jint baud_rate, jint data_bits, jint stop_bits, jint crc, jint flag, jint controlFlag) {
+Java_com_spd_hardware_SerialManager_nativeOpen(JNIEnv *env, jobject/* thiz */, jstring path, jint baud_rate, jint data_bits, jint stop_bits, jint crc,
+                                               jint flag, jint controlFlag) {
     int fd;
     speed_t speed;
     jobject mFileDescriptor;
 
-    speed = getBaudRate(baud_rate);
-    if (speed == -1) {
-        return nullptr;
+    /* Check arguments */
+    {
+        speed = getBaudRate(baud_rate);
+        if (speed == -1) {
+            return nullptr;
+        }
     }
 
-    jboolean isCopy;
-    const char *path_utf = env->GetStringUTFChars(path, &isCopy);
-    fd = open(path_utf, O_RDWR | flag);
-    env->ReleaseStringUTFChars(path, path_utf);
-    if (fd == -1) {
-        return nullptr;
+    /* Opening device */
+    {
+        jboolean isCopy;
+        const char *path_utf = env->GetStringUTFChars(path, &isCopy);
+        fd = open(path_utf, O_RDWR | flag);
+
+        env->ReleaseStringUTFChars(path, path_utf);
+        if (fd == -1) {
+            /* Throw an exception */
+            return nullptr;
+        }
     }
 
-    struct termios cfg{};
-    if (tcgetattr(fd, &cfg)) {
-        close(fd);
-        return nullptr;
+    /* Configure device */
+    {
+        struct termios cfg{};
+        if (tcgetattr(fd, &cfg)) {
+            close(fd);
+            return nullptr;
+        }
+
+        cfmakeraw(&cfg);
+        cfsetispeed(&cfg, speed);
+        cfsetospeed(&cfg, speed);
+
+        cfg.c_cflag &= ~CSIZE;
+        switch (data_bits) {
+            case 5:
+                cfg.c_cflag |= CS5;    //Use 5-bit data bits
+                break;
+            case 6:
+                cfg.c_cflag |= CS6;    //Use 6-bit data bits
+                break;
+            case 7:
+                cfg.c_cflag |= CS7;    //Use 7-bit data bits
+                break;
+            case 8:
+            default:
+                cfg.c_cflag |= CS8;    //Use 8-bit data bits
+                break;
+        }
+
+        switch (crc) {
+            case 0:
+                cfg.c_cflag &= ~PARENB;    // None parity
+                break;
+            case 1:
+                cfg.c_cflag |= (PARODD | PARENB);   // Odd parity
+                break;
+            case 2:
+                cfg.c_iflag &= ~(IGNPAR | PARMRK); // Even parity
+                cfg.c_iflag |= INPCK;
+                cfg.c_cflag |= PARENB;
+                cfg.c_cflag &= ~PARODD;
+                break;
+            default:
+                cfg.c_cflag &= ~PARENB;
+                break;
+        }
+
+        switch (stop_bits) {
+            case 1:
+                cfg.c_cflag &= ~CSTOPB;    // 1 bit stop bit
+                break;
+            case 2:
+                cfg.c_cflag |= CSTOPB;    // 2 bit stop bit
+                break;
+            default:
+                break;
+        }
+
+        // hardware flow control
+        switch (controlFlag) {
+            case 0:
+                cfg.c_cflag &= ~CRTSCTS;    // None flow control
+                break;
+            case 1:
+                cfg.c_cflag |= CRTSCTS;    // Hardware flow control
+                break;
+            case 2:
+                cfg.c_cflag |= IXON | IXOFF | IXANY;    // Software flow control
+                break;
+            default:
+                cfg.c_cflag &= ~CRTSCTS;
+                break;
+        }
+
+
+        if (tcsetattr(fd, TCSANOW, &cfg)) {
+            close(fd);
+            return nullptr;
+        }
     }
 
-    cfmakeraw(&cfg);
-    cfsetispeed(&cfg, speed);
-    cfsetospeed(&cfg, speed);
-    cfg.c_cflag &= ~CSIZE;
-    switch (data_bits) {
-        case 5:
-            //Use 5-bit data bits
-            cfg.c_cflag |= CS5;
-            break;
-        case 6:
-            //Use 6-bit data bits
-            cfg.c_cflag |= CS6;
-            break;
-        case 7:
-            //Use 7-bit data bits
-            cfg.c_cflag |= CS7;
-            break;
-        case 8:
-            cfg.c_cflag |= CS8;
-            break;
-        default:
-            break;
+
+    /* Create a corresponding file descriptor */
+    {
+
+        jclass cFileDescriptor = env->FindClass("java/io/FileDescriptor");
+        jmethodID iFileDescriptor = env->GetMethodID(cFileDescriptor, "<init>", "()V");
+        jfieldID descriptorID = env->GetFieldID(cFileDescriptor, "descriptor", "I");
+        mFileDescriptor = env->NewObject(cFileDescriptor, iFileDescriptor);
+        env->SetIntField(mFileDescriptor, descriptorID, (jint) fd);
+        tcflush(fd, TCIFLUSH);
     }
 
-    switch (crc) {
-        case 0:
-            // None parity
-            cfg.c_cflag &= ~PARENB;
-            break;
-        case 1:
-            // Odd parity
-            cfg.c_cflag |= (PARODD | PARENB);
-            break;
-        case 2:
-            // Even parity
-            cfg.c_iflag &= ~(IGNPAR | PARMRK);
-            cfg.c_iflag |= INPCK;
-            cfg.c_cflag |= PARENB;
-            cfg.c_cflag &= ~PARODD;
-            break;
-        default:
-            break;
-    }
-
-    switch (stop_bits) {
-        case 1:
-            // 1 bit stop bit
-            cfg.c_cflag &= ~CSTOPB;
-            break;
-        case 2:
-            // 2 bit stop bit
-            cfg.c_cflag |= CSTOPB;
-            break;
-        default:
-            break;
-    }
-
-    switch (controlFlag) {
-        case 1:
-            cfg.c_cflag |= CRTSCTS;
-            break;
-        case 2:
-            cfg.c_cflag |= IXON | IXOFF | IXANY;
-            break;
-        default:
-            break;
-    }
-
-    if (tcsetattr(fd, TCSANOW, &cfg)) {
-        close(fd);
-        return nullptr;
-    }
-    jclass cFileDescriptor = env->FindClass("java/io/FileDescriptor");
-    jmethodID iFileDescriptor = env->GetMethodID(cFileDescriptor, "<init>", "()V");
-    jfieldID descriptorID = env->GetFieldID(cFileDescriptor, "descriptor", "I");
-    mFileDescriptor = env->NewObject(cFileDescriptor, iFileDescriptor);
-    env->SetIntField(mFileDescriptor, descriptorID, (jint) fd);
-    tcflush(fd, TCIFLUSH);
     return mFileDescriptor;
 }
 
 
 extern "C"
 JNIEXPORT void JNICALL
-Java_com_spd_hardware_SerialManager_nativeClose(JNIEnv *env,  jobject thiz) {
-    jclass serialPortManager = env->GetObjectClass( thiz);
-    jclass fileDescriptorClass = env->FindClass( "java/io/FileDescriptor");
+Java_com_spd_hardware_SerialManager_nativeClose(JNIEnv *env, jobject thiz) {
+    jclass serialPortManager = env->GetObjectClass(thiz);
+    jclass fileDescriptorClass = env->FindClass("java/io/FileDescriptor");
     jfieldID mFdID = env->GetFieldID(serialPortManager, "fileDescriptor", "Ljava/io/FileDescriptor;");
     jfieldID descriptorId = env->GetFieldID(fileDescriptorClass, "descriptor", "I");
     jobject mFd = env->GetObjectField(thiz, mFdID);
