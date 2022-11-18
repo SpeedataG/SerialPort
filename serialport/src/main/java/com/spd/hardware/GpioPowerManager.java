@@ -310,12 +310,22 @@ public class GpioPowerManager {
     public void powerOn() {
         for (int gpio : gpioList) {
             ShellUtils.execCmd("echo out " + gpio + " 1 > " + gpioPath, false);
+            try {
+                Thread.sleep(100);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
     public void powerOff() {
         for (int gpio : gpioList) {
             ShellUtils.execCmd("echo out " + gpio + " 0 > " + gpioPath, false);
+            try {
+                Thread.sleep(100);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
