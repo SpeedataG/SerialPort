@@ -13,15 +13,15 @@ implementation 'com.github.SpeedataG:SerialPort:Tag'
 ```
 
 
-//初始化
+初始化
 ```
 private val mSerialManager = SerialManager()
 ```
-//打开串口，支持多参数重载，参数信息查看代码注释
+打开串口，支持多参数重载，参数信息查看代码注释
 ```
 mSerialManager.open(serialPort, braut, this)
 ```
-//串口数据回调
+串口数据回调
 
 ```
 override fun onDataReceived(bytes: ByteArray) {
@@ -30,7 +30,7 @@ override fun onDataReceived(bytes: ByteArray) {
 ```
 
 
-//其他回调，可重写可不重写
+其他回调，可重写可不重写
 ```
 /**
      * 打开串口成功
@@ -60,35 +60,35 @@ override fun onDataReceived(bytes: ByteArray) {
     }
 ```
 
-//发送串口数据,支持直接发送byte数组
+发送串口数据,支持直接发送byte数组
 
 ```
 mSerialManager.sendHex("000001")
 ```
 
-//关闭串口
+关闭串口
 
 ```
 mSerialManager.close()
 ```
-//获取串口列表
+获取串口列表
 ```
 mSerialManager.getSerialPorts()
 ```
 
 
-//上下电管理类初始化
+上下电管理类初始化
 ```
 private  val mGpioPowerManager = GpioPowerManager()
 ```
 
-//上电
+上电
 ```
 mGpioPowerManager.apply {
     setGpioPath(powerPath);setGpioList(gpioArray.map { it.toInt() });powerOn()
     }
 ```
-//下电
+下电
 ```
 mGpioPowerManager.powerOff()
 ```
