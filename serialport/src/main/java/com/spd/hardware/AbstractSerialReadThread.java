@@ -296,7 +296,7 @@ public abstract class AbstractSerialReadThread extends Thread {
     public AbstractSerialReadThread(FileInputStream inputStream) {
         super("SerialReadThread");
         mInputStream = inputStream;
-        receiveBuffer = new byte[1024];
+        receiveBuffer = new byte[8192];
     }
 
     @Override
