@@ -3,13 +3,13 @@ plugins {
 }
 
 android {
-    compileSdk 32
+    compileSdk 33
 
     defaultConfig {
-        minSdk 23
-        targetSdk 32
-        versionCode 7
-        versionName "1.0.5"
+        minSdk 21
+        targetSdk 33
+        versionCode 8
+        versionName "1.0.6"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }
@@ -33,5 +33,4 @@ android {
 }
 
 dependencies {
-    api("com.blankj:utilcodex:1.31.0")
 }

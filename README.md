@@ -77,20 +77,4 @@ mSerialManager.getSerialPorts()
 ```
 
 
-上下电管理类初始化
-```
-private  val mGpioPowerManager = GpioPowerManager()
-```
-
-上电
-```
-mGpioPowerManager.apply {
-    setGpioPath(powerPath);setGpioList(gpioArray.map { it.toInt() });powerOn()
-    }
-```
-下电
-```
-mGpioPowerManager.powerOff()
-```
-
 

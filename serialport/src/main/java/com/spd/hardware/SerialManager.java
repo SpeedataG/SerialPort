@@ -285,9 +285,6 @@ package com.spd.hardware;
 import android.text.TextUtils;
 
 
-import com.blankj.utilcode.util.ConvertUtils;
-import com.blankj.utilcode.util.FileIOUtils;
-import com.blankj.utilcode.util.FileUtils;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -371,7 +368,7 @@ public class SerialManager {
      * @return 串口列表
      */
     public List<String> getSerialPorts() {
-        final List<String> drivers = FileIOUtils.readFile2List("/proc/tty/drivers");
+        final List<String> drivers = SerialPortUtil.readFile2List("/proc/tty/drivers");
         if (drivers == null || drivers.size() == 0) {
             return Collections.emptyList();
         }
@@ -445,7 +442,7 @@ public class SerialManager {
         if (TextUtils.isEmpty(hex)) {
             return;
         }
-        sendBytes(ConvertUtils.hexString2Bytes(hex));
+        sendBytes(SerialPortUtil.hexString2Bytes(hex));
     }
 
 
@@ -465,7 +462,7 @@ public class SerialManager {
 
 
     private List<File> filterFileWithStart(String start) {
-        return FileUtils.listFilesInDirWithFilter("dev/", file -> file.getAbsolutePath().startsWith(start));
+        return SerialPortUtil.listFilesInDirWithFilter("dev/", file -> file.getAbsolutePath().startsWith(start));
     }
 
     private native FileDescriptor nativeOpen(String path, int baudRate, int dataBits, int stopBits, int crc, int flag, int controlFlag);
