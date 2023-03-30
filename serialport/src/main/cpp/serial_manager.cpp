@@ -360,7 +360,7 @@ static speed_t getBaudRate(jint baudRate) {
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_spd_hardware_SerialManager_nativeOpen(JNIEnv *env, jobject/* thiz */, jstring path, jint baud_rate, jint data_bits, jint stop_bits, jint crc,
-                                                jint controlFlag) {
+                                               jint controlFlag) {
     int fd;
     speed_t speed;
     jobject mFileDescriptor;
@@ -493,4 +493,21 @@ Java_com_spd_hardware_SerialManager_nativeClose(JNIEnv *env, jobject thiz) {
     jobject mFd = env->GetObjectField(thiz, mFdID);
     jint descriptor = env->GetIntField(mFd, descriptorId);
     close(descriptor);
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_spd_hardware_SerialManager_clearBuffer(JNIEnv *env, jobject thiz) {
+    try {
+        jclass serialPortManager = env->GetObjectClass(thiz);
+        jclass fileDescriptorClass = env->FindClass("java/io/FileDescriptor");
+        jfieldID mFdID = env->GetFieldID(serialPortManager, "fileDescriptor", "Ljava/io/FileDescriptor;");
+        jfieldID descriptorId = env->GetFieldID(fileDescriptorClass, "descriptor", "I");
+        jobject mFd = env->GetObjectField(thiz, mFdID);
+        jint descriptor = env->GetIntField(mFd, descriptorId);
+        tcflush(descriptor, TCIFLUSH);
+    } catch (...) {
+
+    }
+
 }

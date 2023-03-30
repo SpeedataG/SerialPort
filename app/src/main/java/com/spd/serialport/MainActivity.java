@@ -44,6 +44,8 @@ public class MainActivity extends AppCompatActivity implements ISerialPortListen
         SerialConfig serialConfig = new SerialConfig();
         serialConfig.setDevice("dev/ttyS0").setReadSync(true).setSpeed(BaudRateValue.B9600);
         serialManager.open(serialConfig, this);
+        //如果需要，可以先清除缓冲区
+        serialManager.clearSerialBuffer();
 
         serialManager.sendHex("010101");
         try {

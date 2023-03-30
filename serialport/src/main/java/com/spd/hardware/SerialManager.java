@@ -493,6 +493,13 @@ public class SerialManager {
 
     }
 
+    /**
+     * 清除串口缓冲区
+     */
+    public void clearSerialBuffer() {
+        clearBuffer();
+    }
+
     private void stopReadThread() {
         if (mReadThread != null) {
             mReadThread.release();
@@ -515,6 +522,8 @@ public class SerialManager {
     private native FileDescriptor nativeOpen(String path, int baudRate, int dataBits, int stopBits, int crc, int controlFlag);
 
     private native void nativeClose();
+
+    private native void clearBuffer();
 
     static {
         System.loadLibrary("serialManager");
