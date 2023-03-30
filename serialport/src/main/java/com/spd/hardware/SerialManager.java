@@ -285,7 +285,6 @@ package com.spd.hardware;
 import android.text.TextUtils;
 
 
-
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -306,6 +305,7 @@ public class SerialManager {
     private ISerialPortListener iSerialPortListener;
     private AbstractSerialReadThread mReadThread;
     private AbstractSerialSendThread mSendThread;
+
 
     /**
      * 打开串口
@@ -331,15 +331,29 @@ public class SerialManager {
      * @param listener    回调
      */
     public void open(String device, int speed, int dBit, int sBit, int crc, int flag, int controlFlag, ISerialPortListener listener) {
+        SerialConfig serialConfig = new SerialConfig();
+        serialConfig.setDevice(device).setSpeed(speed).setDataBit(dBit).setStopBit(sBit).setCrc(crc).setFlag(flag).setControlFlag(controlFlag);
+        open(serialConfig, listener);
+    }
+
+    /**
+     * 打开串口
+     *
+     * @param config   串口参数配置
+     * @param listener 回调
+     */
+    public void open(SerialConfig config, ISerialPortListener listener) {
         iSerialPortListener = listener;
         try {
-            fileDescriptor = nativeOpen(device, speed, dBit, sBit, crc, flag, controlFlag);
+            fileDescriptor = nativeOpen(config.getDevice(), config.getSpeed(), config.getDataBit(), config.getStopBit(), config.getCrc(), config.getFlag(), config.getControlFlag());
             mFileInputStream = new FileInputStream(fileDescriptor);
             mFileOutputStream = new FileOutputStream(fileDescriptor);
-            startReadThread();
+            if (!config.isReadSync()) {
+                startReadThread();
+            }
             startSendThread();
             if (iSerialPortListener != null) {
-                iSerialPortListener.onOpenSuccess(new File(device));
+                iSerialPortListener.onOpenSuccess(new File(config.getDevice()));
             }
 
         } catch (Exception e) {
@@ -348,7 +362,6 @@ public class SerialManager {
             }
         }
     }
-
 
     /**
      * 关闭串口
@@ -398,7 +411,7 @@ public class SerialManager {
         mReadThread.start();
     }
 
-    private void startSendThread(){
+    private void startSendThread() {
         mSendThread = new AbstractSerialSendThread(mFileOutputStream) {
             @Override
             public void onDataSend(byte[] bytes) {
@@ -416,7 +429,7 @@ public class SerialManager {
      * @param bytes 字节数组类型
      */
     public void sendBytes(byte[] bytes) {
-        if (mSendThread!=null){
+        if (mSendThread != null) {
             mSendThread.sendBytes(bytes);
         }
     }
@@ -445,6 +458,23 @@ public class SerialManager {
         sendBytes(SerialPortUtil.hexString2Bytes(hex));
     }
 
+    /**
+     * 同步方式读取串口数据
+     *
+     * @return 当前缓冲区数据
+     */
+    public byte[] readSerialSync() {
+        try {
+            byte[] receiveBuffer = new byte[8192];
+            int size = mFileInputStream.read(receiveBuffer);
+            byte[] realBytes = new byte[size];
+            System.arraycopy(receiveBuffer, 0, realBytes, 0, size);
+            return realBytes;
+        } catch (Exception e) {
+            return new byte[0];
+        }
+
+    }
 
     private void stopReadThread() {
         if (mReadThread != null) {
@@ -453,8 +483,8 @@ public class SerialManager {
         }
     }
 
-    private void stopSendThread(){
-        if (mSendThread!=null){
+    private void stopSendThread() {
+        if (mSendThread != null) {
             mSendThread.release();
             mSendThread = null;
         }
