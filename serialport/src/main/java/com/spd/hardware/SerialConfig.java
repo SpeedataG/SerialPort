@@ -1,5 +1,11 @@
 package com.spd.hardware;
 
+import com.spd.hardware.value.BaudRateValue;
+import com.spd.hardware.value.ControlFlagBitValue;
+import com.spd.hardware.value.CrcBitValue;
+import com.spd.hardware.value.DataBitValue;
+import com.spd.hardware.value.StopBitValue;
+
 /**
  * @author :Reginer  2023/3/30 0030 10:54.
  * 联系方式:QQ:282921012
@@ -8,12 +14,11 @@ package com.spd.hardware;
 public class SerialConfig {
 
     private String device;
-    private int speed = 115200;
-    private int dBit = 8;
-    private int sBit = 2;
-    private int crc = 0;
-    private int flag = 0;
-    private int controlFlag = 0;
+    private int speed = BaudRateValue.B115200;
+    private int dBit = DataBitValue.CS8;
+    private int sBit = StopBitValue.B2;
+    private int crc = CrcBitValue.NONE;
+    private int controlFlag = ControlFlagBitValue.NONE;
     private boolean readSync = false;
 
     public String getDevice() {
@@ -41,7 +46,7 @@ public class SerialConfig {
      * @param speed 波特率
      * @return {@link  SerialConfig}
      */
-    public SerialConfig setSpeed(int speed) {
+    public SerialConfig setSpeed(@BaudRateValue.BaudRate int speed) {
         this.speed = speed;
         return this;
     }
@@ -56,7 +61,7 @@ public class SerialConfig {
      * @param dBit 数据位
      * @return {@link  SerialConfig}
      */
-    public SerialConfig setDataBit(int dBit) {
+    public SerialConfig setDataBit(@DataBitValue.DataBit int dBit) {
         this.dBit = dBit;
         return this;
     }
@@ -71,7 +76,7 @@ public class SerialConfig {
      * @param sBit 停止位
      * @return {@link  SerialConfig}
      */
-    public SerialConfig setStopBit(int sBit) {
+    public SerialConfig setStopBit(@StopBitValue.StopBit int sBit) {
         this.sBit = sBit;
         return this;
     }
@@ -86,23 +91,8 @@ public class SerialConfig {
      * @param crc 校验位
      * @return {@link  SerialConfig}
      */
-    public SerialConfig setCrc(int crc) {
+    public SerialConfig setCrc(@CrcBitValue.CrcBit int crc) {
         this.crc = crc;
-        return this;
-    }
-
-    public int getFlag() {
-        return flag;
-    }
-
-    /**
-     * 设置打开方式
-     *
-     * @param flag 打开方式
-     * @return {@link  SerialConfig}
-     */
-    public SerialConfig setFlag(int flag) {
-        this.flag = flag;
         return this;
     }
 
@@ -116,7 +106,7 @@ public class SerialConfig {
      * @param controlFlag 流控
      * @return {@link  SerialConfig}
      */
-    public SerialConfig setControlFlag(int controlFlag) {
+    public SerialConfig setControlFlag(@ControlFlagBitValue.ControlFlagBit int controlFlag) {
         this.controlFlag = controlFlag;
         return this;
     }

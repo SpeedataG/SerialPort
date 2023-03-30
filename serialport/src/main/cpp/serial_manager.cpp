@@ -360,7 +360,7 @@ static speed_t getBaudRate(jint baudRate) {
 extern "C"
 JNIEXPORT jobject JNICALL
 Java_com_spd_hardware_SerialManager_nativeOpen(JNIEnv *env, jobject/* thiz */, jstring path, jint baud_rate, jint data_bits, jint stop_bits, jint crc,
-                                               jint flag, jint controlFlag) {
+                                                jint controlFlag) {
     int fd;
     speed_t speed;
     jobject mFileDescriptor;
@@ -377,7 +377,7 @@ Java_com_spd_hardware_SerialManager_nativeOpen(JNIEnv *env, jobject/* thiz */, j
     {
         jboolean isCopy;
         const char *path_utf = env->GetStringUTFChars(path, &isCopy);
-        fd = open(path_utf, O_RDWR | flag);
+        fd = open(path_utf, O_RDWR);
 
         env->ReleaseStringUTFChars(path, path_utf);
         if (fd == -1) {

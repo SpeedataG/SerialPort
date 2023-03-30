@@ -285,6 +285,12 @@ package com.spd.hardware;
 import android.text.TextUtils;
 
 
+import com.spd.hardware.value.BaudRateValue;
+import com.spd.hardware.value.ControlFlagBitValue;
+import com.spd.hardware.value.CrcBitValue;
+import com.spd.hardware.value.DataBitValue;
+import com.spd.hardware.value.StopBitValue;
+
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -314,8 +320,8 @@ public class SerialManager {
      * @param speed    波特率
      * @param listener 回调
      */
-    public void open(String device, int speed, ISerialPortListener listener) {
-        open(device, speed, 8, 2, 0, 0, 0, listener);
+    public void open(String device, @BaudRateValue.BaudRate int speed, ISerialPortListener listener) {
+        open(device, speed, DataBitValue.CS8, StopBitValue.B2, CrcBitValue.NONE, ControlFlagBitValue.NONE, listener);
     }
 
     /**
@@ -326,13 +332,19 @@ public class SerialManager {
      * @param dBit        数据位
      * @param sBit        停止位
      * @param crc         校验位
-     * @param flag        打开方式  O_RDWR读写 | O_NOCTTY不允许进程管理串口 | O_NDELAY非阻塞,传0默认 O_RDWR
      * @param controlFlag 流控，0不设置，1硬件流控，2软件流控
      * @param listener    回调
      */
-    public void open(String device, int speed, int dBit, int sBit, int crc, int flag, int controlFlag, ISerialPortListener listener) {
+    public void open(String device, @BaudRateValue.BaudRate int speed,
+                     @DataBitValue.DataBit int dBit,
+                     @StopBitValue.StopBit int sBit,
+                     @CrcBitValue.CrcBit int crc,
+                     @ControlFlagBitValue.ControlFlagBit int controlFlag,
+                     ISerialPortListener listener) {
         SerialConfig serialConfig = new SerialConfig();
-        serialConfig.setDevice(device).setSpeed(speed).setDataBit(dBit).setStopBit(sBit).setCrc(crc).setFlag(flag).setControlFlag(controlFlag);
+        serialConfig.setSpeed(speed).setDataBit(dBit)
+                .setStopBit(sBit).setCrc(crc)
+                .setControlFlag(controlFlag).setDevice(device);
         open(serialConfig, listener);
     }
 
@@ -345,7 +357,12 @@ public class SerialManager {
     public void open(SerialConfig config, ISerialPortListener listener) {
         iSerialPortListener = listener;
         try {
-            fileDescriptor = nativeOpen(config.getDevice(), config.getSpeed(), config.getDataBit(), config.getStopBit(), config.getCrc(), config.getFlag(), config.getControlFlag());
+            fileDescriptor = nativeOpen(config.getDevice(),
+                    config.getSpeed(),
+                    config.getDataBit(),
+                    config.getStopBit(),
+                    config.getCrc(),
+                    config.getControlFlag());
             mFileInputStream = new FileInputStream(fileDescriptor);
             mFileOutputStream = new FileOutputStream(fileDescriptor);
             if (!config.isReadSync()) {
@@ -495,7 +512,7 @@ public class SerialManager {
         return SerialPortUtil.listFilesInDirWithFilter("dev/", file -> file.getAbsolutePath().startsWith(start));
     }
 
-    private native FileDescriptor nativeOpen(String path, int baudRate, int dataBits, int stopBits, int crc, int flag, int controlFlag);
+    private native FileDescriptor nativeOpen(String path, int baudRate, int dataBits, int stopBits, int crc, int controlFlag);
 
     private native void nativeClose();
 

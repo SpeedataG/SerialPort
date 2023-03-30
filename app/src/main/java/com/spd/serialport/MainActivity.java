@@ -8,6 +8,7 @@ import android.widget.Toast;
 import com.spd.hardware.ISerialPortListener;
 import com.spd.hardware.SerialConfig;
 import com.spd.hardware.SerialManager;
+import com.spd.hardware.value.BaudRateValue;
 
 import java.io.File;
 import java.util.Arrays;
@@ -22,26 +23,27 @@ public class MainActivity extends AppCompatActivity implements ISerialPortListen
 
 
     /**
-     * 异步方式读取身份数据
+     * 异步方式读取串口数据
      * onDataReceived会被回调
      */
     @SuppressWarnings("unused")
     private void serialPortFunc() {
         SerialManager serialManager = new SerialManager();
         SerialConfig serialConfig = new SerialConfig();
-        serialConfig.setDevice("dev/ttyS0").setSpeed(115200);
+        serialConfig.setDevice("dev/ttyS0").setSpeed(BaudRateValue.B115200);
         serialManager.open(serialConfig, this);
     }
+
     /**
-     * 同步方式读取身份数据
+     * 同步方式读取串口数据
      * onDataReceived不会被回调
      */
     @SuppressWarnings("unused")
     private void serialPortFuncSync() {
         SerialManager serialManager = new SerialManager();
         SerialConfig serialConfig = new SerialConfig();
-        serialConfig.setDevice("dev/ttyS0").setSpeed(115200).setReadSync(true);
-        serialManager.open("dev/ttyS0", 115200, this);
+        serialConfig.setDevice("dev/ttyS0").setReadSync(true).setSpeed(BaudRateValue.B9600);
+        serialManager.open(serialConfig, this);
 
         serialManager.sendHex("010101");
         try {
