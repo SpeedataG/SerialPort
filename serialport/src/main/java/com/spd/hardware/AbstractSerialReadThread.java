@@ -283,6 +283,7 @@ package com.spd.hardware;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * @author :Reginer  2022/2/25 15:59.
@@ -291,12 +292,12 @@ import java.io.IOException;
  */
 public abstract class AbstractSerialReadThread extends Thread {
     private FileInputStream mInputStream;
-    private final byte[] receiveBuffer;
+    private final ByteBuffer receiveBuffer;
 
     public AbstractSerialReadThread(FileInputStream inputStream) {
         super("SerialReadThread");
         mInputStream = inputStream;
-        receiveBuffer = new byte[8192];
+        receiveBuffer = ByteBuffer.allocate(4096);
     }
 
     @Override
@@ -304,18 +305,20 @@ public abstract class AbstractSerialReadThread extends Thread {
         super.run();
         while (mInputStream != null) {
             try {
-                int size = mInputStream.read(receiveBuffer);
+                int size = mInputStream.read(receiveBuffer.array(),0,mInputStream.available());
                 if (size <= 0) {
                     continue;
                 }
+                receiveBuffer.limit(size);
                 byte[] realBytes = new byte[size];
-                System.arraycopy(receiveBuffer, 0, realBytes, 0, size);
+                receiveBuffer.get(realBytes);
                 onDataReceived(realBytes);
+                receiveBuffer.clear();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
         }
+
     }
 
     /**

@@ -295,6 +295,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -482,16 +483,17 @@ public class SerialManager {
      */
     public byte[] readSerialSync() {
         try {
-            byte[] receiveBuffer = new byte[8192];
-            int size = mFileInputStream.read(receiveBuffer);
+            ByteBuffer receiveBuffer = ByteBuffer.allocate(8192);
+            int size = mFileInputStream.read(receiveBuffer.array(),0,mFileInputStream.available());
+            receiveBuffer.limit(size);
             byte[] realBytes = new byte[size];
-            System.arraycopy(receiveBuffer, 0, realBytes, 0, size);
+            receiveBuffer.get(realBytes);
             return realBytes;
         } catch (Exception e) {
             return new byte[0];
         }
-
     }
+
 
     /**
      * 清除串口缓冲区

@@ -3,7 +3,7 @@ package com.spd.serialport;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
-import android.widget.Toast;
+import android.util.Log;
 
 import com.spd.hardware.ISerialPortListener;
 import com.spd.hardware.SerialConfig;
@@ -19,6 +19,7 @@ public class MainActivity extends AppCompatActivity implements ISerialPortListen
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        serialPortFunc();
     }
 
 
@@ -70,7 +71,7 @@ public class MainActivity extends AppCompatActivity implements ISerialPortListen
 
     @Override
     public void onDataReceived(byte[] bytes) {
-        runOnUiThread(() -> Toast.makeText(MainActivity.this, Arrays.toString(bytes), Toast.LENGTH_SHORT).show());
+        runOnUiThread(() -> Log.i("SpdSerial",Arrays.toString(bytes)));
     }
 
     @Override
