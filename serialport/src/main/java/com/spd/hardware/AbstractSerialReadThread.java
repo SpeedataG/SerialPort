@@ -305,7 +305,7 @@ public abstract class AbstractSerialReadThread extends Thread {
         super.run();
         while (mInputStream != null) {
             try {
-                int size = mInputStream.read(receiveBuffer.array(),0,mInputStream.available());
+                int size = mInputStream.read(receiveBuffer.array());
                 if (size <= 0) {
                     continue;
                 }

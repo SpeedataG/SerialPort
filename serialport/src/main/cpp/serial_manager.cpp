@@ -482,22 +482,7 @@ Java_com_spd_hardware_SerialManager_nativeOpen(JNIEnv *env, jobject/* thiz */, j
     return mFileDescriptor;
 }
 
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_spd_hardware_SerialManager_nativeClose(JNIEnv *env, jobject thiz) {
-    jclass serialPortManager = env->GetObjectClass(thiz);
-    jclass fileDescriptorClass = env->FindClass("java/io/FileDescriptor");
-    jfieldID mFdID = env->GetFieldID(serialPortManager, "fileDescriptor", "Ljava/io/FileDescriptor;");
-    jfieldID descriptorId = env->GetFieldID(fileDescriptorClass, "descriptor", "I");
-    jobject mFd = env->GetObjectField(thiz, mFdID);
-    jint descriptor = env->GetIntField(mFd, descriptorId);
-    close(descriptor);
-}
-
-extern "C"
-JNIEXPORT void JNICALL
-Java_com_spd_hardware_SerialManager_clearBuffer(JNIEnv *env, jobject thiz) {
+static int getFd(JNIEnv *env, jobject thiz) {
     try {
         jclass serialPortManager = env->GetObjectClass(thiz);
         jclass fileDescriptorClass = env->FindClass("java/io/FileDescriptor");
@@ -505,9 +490,21 @@ Java_com_spd_hardware_SerialManager_clearBuffer(JNIEnv *env, jobject thiz) {
         jfieldID descriptorId = env->GetFieldID(fileDescriptorClass, "descriptor", "I");
         jobject mFd = env->GetObjectField(thiz, mFdID);
         jint descriptor = env->GetIntField(mFd, descriptorId);
-        tcflush(descriptor, TCIFLUSH);
+        return descriptor;
     } catch (...) {
-
+        return -1;
     }
 
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_spd_hardware_SerialManager_nativeClose(JNIEnv *env, jobject thiz) {
+    close(getFd(env,thiz));
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_com_spd_hardware_SerialManager_clearBuffer(JNIEnv *env, jobject thiz) {
+    tcflush(getFd(env,thiz),TCIFLUSH);
 }
