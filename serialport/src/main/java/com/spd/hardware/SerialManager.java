@@ -313,6 +313,7 @@ public class SerialManager {
     private AbstractSerialReadThread mReadThread;
     private AbstractSerialSendThread mSendThread;
 
+    private int maxLength = 4096;
 
     /**
      * 打开串口
@@ -364,6 +365,7 @@ public class SerialManager {
                     config.getStopBit(),
                     config.getCrc(),
                     config.getControlFlag());
+            maxLength = config.getMaxLength();
             mFileInputStream = new FileInputStream(fileDescriptor);
             mFileOutputStream = new FileOutputStream(fileDescriptor);
             if (!config.isReadSync()) {
@@ -418,7 +420,7 @@ public class SerialManager {
     }
 
     private void startReadThread() {
-        mReadThread = new AbstractSerialReadThread(mFileInputStream) {
+        mReadThread = new AbstractSerialReadThread(mFileInputStream,maxLength) {
             @Override
             public void onDataReceived(byte[] bytes) {
                 if (iSerialPortListener != null) {
@@ -483,8 +485,8 @@ public class SerialManager {
      */
     public byte[] readSerialSync() {
         try {
-            ByteBuffer receiveBuffer = ByteBuffer.allocate(8192);
-            int size = mFileInputStream.read(receiveBuffer.array(),0,mFileInputStream.available());
+            ByteBuffer receiveBuffer = ByteBuffer.allocate(maxLength);
+            int size = mFileInputStream.read(receiveBuffer.array(), 0, mFileInputStream.available());
             receiveBuffer.limit(size);
             byte[] realBytes = new byte[size];
             receiveBuffer.get(realBytes);

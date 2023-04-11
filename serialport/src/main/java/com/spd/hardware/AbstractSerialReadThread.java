@@ -294,10 +294,10 @@ public abstract class AbstractSerialReadThread extends Thread {
     private FileInputStream mInputStream;
     private final ByteBuffer receiveBuffer;
 
-    public AbstractSerialReadThread(FileInputStream inputStream) {
+    public AbstractSerialReadThread(FileInputStream inputStream, int maxLength) {
         super("SerialReadThread");
         mInputStream = inputStream;
-        receiveBuffer = ByteBuffer.allocate(4096);
+        receiveBuffer = ByteBuffer.allocate(maxLength);
     }
 
     @Override

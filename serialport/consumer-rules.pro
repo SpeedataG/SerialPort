@@ -1,0 +1,2 @@
+-keep class com.spd.hardware.value.**{*;}
+-keep class com.spd.hardware.SerialConfig{*;}

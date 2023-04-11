@@ -1,5 +1,7 @@
 package com.spd.hardware;
 
+import android.annotation.IntRange;
+
 import com.spd.hardware.value.BaudRateValue;
 import com.spd.hardware.value.ControlFlagBitValue;
 import com.spd.hardware.value.CrcBitValue;
@@ -19,6 +21,7 @@ public class SerialConfig {
     private int sBit = StopBitValue.B2;
     private int crc = CrcBitValue.NONE;
     private int controlFlag = ControlFlagBitValue.NONE;
+    private int maxLength = 4096;
     private boolean readSync = false;
 
     public String getDevice() {
@@ -108,6 +111,21 @@ public class SerialConfig {
      */
     public SerialConfig setControlFlag(@ControlFlagBitValue.ControlFlagBit int controlFlag) {
         this.controlFlag = controlFlag;
+        return this;
+    }
+
+    public int getMaxLength() {
+        return maxLength;
+    }
+
+    /**
+     * 设置单条数据最大长度
+     *
+     * @param maxLength 单条数据最大长度
+     * @return {@link  SerialConfig}
+     */
+    public SerialConfig setMaxLength(@IntRange(from = 1) int maxLength) {
+        this.maxLength = maxLength;
         return this;
     }
 

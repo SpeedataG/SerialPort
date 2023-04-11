@@ -31,7 +31,13 @@ public class MainActivity extends AppCompatActivity implements ISerialPortListen
     private void serialPortFunc() {
         SerialManager serialManager = new SerialManager();
         SerialConfig serialConfig = new SerialConfig();
-        serialConfig.setDevice("dev/ttyS0").setSpeed(BaudRateValue.B115200);
+        serialConfig.setDevice("dev/ttyS0")
+                .setSpeed(BaudRateValue.B115200)
+//                .setDataBit(DataBitValue.CS8)
+//                .setStopBit(StopBitValue.B2)
+//                .setCrc(CrcBitValue.NONE)
+//                .setMaxLength(4096)
+        ;
         serialManager.open(serialConfig, this);
     }
 
@@ -71,7 +77,7 @@ public class MainActivity extends AppCompatActivity implements ISerialPortListen
 
     @Override
     public void onDataReceived(byte[] bytes) {
-        runOnUiThread(() -> Log.i("SpdSerial",Arrays.toString(bytes)));
+        runOnUiThread(() -> Log.i("SpdSerial", Arrays.toString(bytes)));
     }
 
     @Override

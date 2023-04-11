@@ -17,9 +17,11 @@ implementation 'com.github.SpeedataG:SerialPort:Tag'
 ```
 private val mSerialManager = SerialManager()
 ```
-打开串口，支持多参数重载，参数信息查看代码注释
+打开串口，支持更多配置，可查看`MainActivity#serialPortFunc`
 ```
-mSerialManager.open(serialPort, braut, this)
+SerialConfig serialConfig = new SerialConfig();
+serialConfig.setDevice("dev/ttyS0").setSpeed(BaudRateValue.B115200);
+serialManager.open(serialConfig, this);
 ```
 串口数据回调
 

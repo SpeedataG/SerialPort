@@ -315,6 +315,7 @@ public abstract class AbstractSerialSendThread extends HandlerThread {
                 if (mFileOutputStream != null && sendBytes != null && sendBytes.length > 0) {
                     try {
                         mFileOutputStream.write(sendBytes);
+                        mFileOutputStream.flush();
                         onDataSend(sendBytes);
                     } catch (Exception e) {
                         e.printStackTrace();
