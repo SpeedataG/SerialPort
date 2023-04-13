@@ -18,7 +18,7 @@ public class SerialConfig {
     private String device;
     private int speed = BaudRateValue.B115200;
     private int dBit = DataBitValue.CS8;
-    private int sBit = StopBitValue.B2;
+    private int sBit = StopBitValue.B1;
     private int crc = CrcBitValue.NONE;
     private int controlFlag = ControlFlagBitValue.NONE;
     private int maxLength = 4096;

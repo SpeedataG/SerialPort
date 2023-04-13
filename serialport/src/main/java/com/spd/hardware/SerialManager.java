@@ -323,7 +323,7 @@ public class SerialManager {
      * @param listener 回调
      */
     public void open(String device, @BaudRateValue.BaudRate int speed, ISerialPortListener listener) {
-        open(device, speed, DataBitValue.CS8, StopBitValue.B2, CrcBitValue.NONE, ControlFlagBitValue.NONE, listener);
+        open(device, speed, DataBitValue.CS8, StopBitValue.B1, CrcBitValue.NONE, ControlFlagBitValue.NONE, listener);
     }
 
     /**
