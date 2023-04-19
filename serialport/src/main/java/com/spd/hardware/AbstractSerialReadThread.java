@@ -293,11 +293,13 @@ import java.nio.ByteBuffer;
 public abstract class AbstractSerialReadThread extends Thread {
     private FileInputStream mInputStream;
     private final ByteBuffer receiveBuffer;
+    private final SerialConfig mSerialConfig;
 
-    public AbstractSerialReadThread(FileInputStream inputStream, int maxLength) {
+    public AbstractSerialReadThread(FileInputStream inputStream, SerialConfig serialConfig) {
         super("SerialReadThread");
         mInputStream = inputStream;
-        receiveBuffer = ByteBuffer.allocate(maxLength);
+        mSerialConfig = serialConfig;
+        receiveBuffer = ByteBuffer.allocate(serialConfig.getMaxLength());
     }
 
     @Override
@@ -305,6 +307,11 @@ public abstract class AbstractSerialReadThread extends Thread {
         super.run();
         while (mInputStream != null) {
             try {
+                if (mSerialConfig.getMaxTimeInterval() > 0) {
+                    synchronized (this) {
+                        wait(mSerialConfig.getMaxTimeInterval());
+                    }
+                }
                 int size = mInputStream.read(receiveBuffer.array());
                 if (size <= 0) {
                     continue;
@@ -316,6 +323,10 @@ public abstract class AbstractSerialReadThread extends Thread {
                 receiveBuffer.clear();
             } catch (Exception e) {
                 e.printStackTrace();
+            } finally {
+                synchronized (this) {
+                    notify();
+                }
             }
         }
 

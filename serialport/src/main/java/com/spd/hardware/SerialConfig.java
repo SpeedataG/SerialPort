@@ -24,6 +24,8 @@ public class SerialConfig {
     private int maxLength = 4096;
     private boolean readSync = false;
 
+    private int maxTimeInterval = 0;
+
     public String getDevice() {
         return device;
     }
@@ -126,6 +128,20 @@ public class SerialConfig {
      */
     public SerialConfig setMaxLength(@IntRange(from = 1) int maxLength) {
         this.maxLength = maxLength;
+        return this;
+    }
+
+    public int getMaxTimeInterval() {
+        return maxTimeInterval;
+    }
+
+    /**
+     * 设置可能存在的分条数据之间的最大时间间隔
+     * @param maxTimeInterval 分条数据最大时间间隔
+     * @return {@link  SerialConfig}
+     */
+    public SerialConfig setMaxTimeInterval(int maxTimeInterval) {
+        this.maxTimeInterval = maxTimeInterval;
         return this;
     }
 
