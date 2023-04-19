@@ -279,102 +279,69 @@
  *
  */
 
-package com.spd.hardware;
+package com.spd.serialport;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Arrays;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * @author :Reginer  2022/2/25 15:59.
+ * @author :Reginer  2023/3/28 0028 12:02.
  * 联系方式:QQ:282921012
- * 功能描述:串口读取线程
+ * 功能描述:
  */
-public abstract class AbstractSerialReadThread extends Thread {
-    private FileInputStream mInputStream;
-    private final ByteBuffer receiveBuffer;
-    private final SerialConfig mSerialConfig;
-    private byte[] saveArray = new byte[0];
+public class GpioPowerManager {
+    private final List<Integer> gpioList = new ArrayList<>();
+    private String gpioPath = "";
 
-    public AbstractSerialReadThread(FileInputStream inputStream, SerialConfig serialConfig) {
-        super("SerialReadThread");
-        mInputStream = inputStream;
-        mSerialConfig = serialConfig;
-        receiveBuffer = ByteBuffer.allocate(serialConfig.getMaxLength());
-    }
+    public GpioPowerManager() {
 
-    @Override
-    public void run() {
-        super.run();
-        while (mInputStream != null) {
-            parseSerial();
-        }
-
-    }
-
-
-    private synchronized void parseSerial() {
-        try {
-            if (mSerialConfig.getMaxTimeInterval() > 0) {
-                if (mInputStream.available() > 0) {
-                    byte[] tempArray = new byte[mSerialConfig.getMaxLength()];
-                    int size = mInputStream.read(tempArray);
-                    byte[] realBytes = new byte[size];
-                    System.arraycopy(tempArray, 0, realBytes, 0, size);
-                    saveArray = concat(saveArray, realBytes);
-                    wait(mSerialConfig.getMaxTimeInterval());
-                    parseSerial();
-                } else {
-                    if (saveArray.length > 0) {
-                        onDataReceived(saveArray);
-                        saveArray = new byte[0];
-                    }
-                }
-            } else {
-                int size = mInputStream.read(receiveBuffer.array());
-                if (size > 0) {
-                    receiveBuffer.limit(size);
-                    byte[] realBytes = new byte[size];
-                    receiveBuffer.get(realBytes);
-                    onDataReceived(realBytes);
-                    receiveBuffer.clear();
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally {
-            notify();
-        }
-    }
-
-    private static byte[] concat(byte[] first, byte[] second) {
-        byte[] result = Arrays.copyOf(first, first.length + second.length);
-        System.arraycopy(second, 0, result, first.length, second.length);
-        return result;
     }
 
     /**
-     * 读取到数据
+     * 设置gpio操作路径
      *
-     * @param bytes 读取到的数据
+     * @param path gpio路径
      */
-    public abstract void onDataReceived(byte[] bytes);
+    public void setGpioPath(String path) {
+        gpioPath = path;
+    }
 
     /**
-     * 停止读取
+     * 设置待操作gpio列表
+     *
+     * @param gpio gpio列表
      */
-    public void release() {
-        interrupt();
-        if (mInputStream != null) {
+    public void setGpioList(List<Integer> gpio) {
+        gpioList.addAll(gpio);
+    }
+
+    /**
+     * 拉高
+     */
+    public void powerOn() {
+        for (int gpio : gpioList) {
+            ShellUtils.execCmd("echo out " + gpio + " 1 > " + gpioPath, false);
             try {
-                mInputStream.close();
-            } catch (IOException e) {
+                Thread.sleep(20);
+            } catch (Exception e) {
                 e.printStackTrace();
-            } finally {
-                mInputStream = null;
             }
         }
     }
+
+    /**
+     * 拉低
+     */
+    public void powerOff() {
+        for (int gpio : gpioList) {
+            ShellUtils.execCmd("echo out " + gpio + " 0 > " + gpioPath, false);
+            try {
+                Thread.sleep(20);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

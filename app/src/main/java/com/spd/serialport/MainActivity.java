@@ -11,9 +11,13 @@ import com.spd.hardware.SerialManager;
 import com.spd.hardware.value.BaudRateValue;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity implements ISerialPortListener {
+    private final SerialManager serialManager = new SerialManager();
+
+    private final GpioPowerManager gpioPowerManager = new GpioPowerManager();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,17 +31,25 @@ public class MainActivity extends AppCompatActivity implements ISerialPortListen
      * 异步方式读取串口数据
      * onDataReceived会被回调
      */
-    @SuppressWarnings("unused")
     private void serialPortFunc() {
-        SerialManager serialManager = new SerialManager();
+
         SerialConfig serialConfig = new SerialConfig();
         serialConfig.setDevice("dev/ttyS0")
-                .setSpeed(BaudRateValue.B115200)
+                .setSpeed(BaudRateValue.B115200).setMaxTimeInterval(3)
 //                .setDataBit(DataBitValue.CS8)
 //                .setStopBit(StopBitValue.B2)
 //                .setCrc(CrcBitValue.NONE)
 //                .setMaxLength(4096)
+
         ;
+        gpioPowerManager.setGpioPath("/sys/devices/platform/pinctrl/mt_gpio");
+        gpioPowerManager.setGpioList(new ArrayList<Integer>() {
+            {
+                add(2);
+                add(115);
+            }
+        });
+        gpioPowerManager.powerOn();
         serialManager.open(serialConfig, this);
     }
 
@@ -67,12 +79,12 @@ public class MainActivity extends AppCompatActivity implements ISerialPortListen
 
     @Override
     public void onOpenSuccess(File device) {
-
+        Log.i("SpdSerial", "onOpenSuccess "+device.getAbsolutePath());
     }
 
     @Override
     public void onOpenFailed(Exception e) {
-
+        Log.i("SpdSerial", "onOpenFailed "+Log.getStackTraceString(e));
     }
 
     @Override
@@ -83,5 +95,12 @@ public class MainActivity extends AppCompatActivity implements ISerialPortListen
     @Override
     public void onDataSend(byte[] bytes) {
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        serialManager.close();
+        gpioPowerManager.powerOff();
+        super.onDestroy();
     }
 }
