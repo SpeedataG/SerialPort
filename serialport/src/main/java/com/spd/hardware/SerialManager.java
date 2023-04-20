@@ -297,7 +297,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -497,33 +496,6 @@ public class SerialManager {
             return new byte[0];
         }
     }
-
-    /**
-     * 同步方式读取串口数据
-     *
-     * @param length  读取长度
-     * @param delayMs 读取延时,毫秒数
-     * @return 当数据长度或者等待时长任意一条满足时返回读取到的数据
-     */
-    public byte[] readSerialSync(int length, int delayMs) {
-        try {
-            ByteBuffer buffer = ByteBuffer.allocate(length);
-            int totalRead = 0;
-            long startTime = System.currentTimeMillis();
-            while (totalRead < length && System.currentTimeMillis() - startTime < delayMs) {
-                int bytesRead = mFileInputStream.getChannel().read(buffer);
-                if (bytesRead == -1) {
-                    break;
-                }
-                totalRead += bytesRead;
-            }
-            return Arrays.copyOf(buffer.array(), totalRead);
-        } catch (Exception e) {
-            return new byte[0];
-        }
-
-    }
-
 
     /**
      * 清除串口缓冲区
