@@ -284,7 +284,6 @@ package com.spd.hardware;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 /**
  * @author :Reginer  2022/2/25 15:59.
@@ -322,7 +321,7 @@ public abstract class AbstractSerialReadThread extends Thread {
                     int size = mInputStream.read(tempArray);
                     byte[] realBytes = new byte[size];
                     System.arraycopy(tempArray, 0, realBytes, 0, size);
-                    saveArray = concat(saveArray, realBytes);
+                    saveArray = SerialPortUtil.concat(saveArray, realBytes);
                     wait(mSerialConfig.getMaxTimeInterval());
                     parseSerial();
                 } else {
@@ -349,11 +348,7 @@ public abstract class AbstractSerialReadThread extends Thread {
         }
     }
 
-    private static byte[] concat(byte[] first, byte[] second) {
-        byte[] result = Arrays.copyOf(first, first.length + second.length);
-        System.arraycopy(second, 0, result, first.length, second.length);
-        return result;
-    }
+
 
     /**
      * 读取到数据

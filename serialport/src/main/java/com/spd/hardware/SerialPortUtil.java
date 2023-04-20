@@ -2,14 +2,12 @@ package com.spd.hardware;
 
 import android.text.TextUtils;
 
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -27,6 +25,7 @@ public class SerialPortUtil {
      * @return the bytes
      */
     public static byte[] hexString2Bytes(String hexString) {
+
         if (TextUtils.isEmpty(hexString)) {
             return new byte[0];
         }
@@ -54,48 +53,18 @@ public class SerialPortUtil {
     }
 
 
-
-    /**
-     * Return the lines in file.
-     *
-     * @param filePath The path of file.
-     * @return the lines in file
-     */
-    @SuppressWarnings("")
-    public static List<String> readFile2List(final String filePath) {
-        File currentFile = new File(filePath);
-        if (!currentFile.exists()) {
-            return null;
-        }
-        BufferedReader reader = null;
-        try {
+    public static List<String> readFile2List(String filePath) {
+        List<String> lines = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
-            int curLine = 1;
-            List<String> list = new ArrayList<>();
-
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream(currentFile)));
-
             while ((line = reader.readLine()) != null) {
-                if (0 <= curLine) {
-                    list.add(line);
-                }
-                ++curLine;
+                lines.add(line);
             }
-            return list;
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-            return null;
-        } finally {
-            try {
-                if (reader != null) {
-                    reader.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
         }
+        return lines;
     }
-
 
     /**
      * Return the files that satisfy the filter in directory.
@@ -129,5 +98,12 @@ public class SerialPortUtil {
      */
     private static boolean isDir(final File file) {
         return file != null && file.exists() && file.isDirectory();
+    }
+
+
+    public static byte[] concat(byte[] first, byte[] second) {
+        byte[] result = Arrays.copyOf(first, first.length + second.length);
+        System.arraycopy(second, 0, result, first.length, second.length);
+        return result;
     }
 }

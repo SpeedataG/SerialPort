@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements ISerialPortListen
     }
 
     @Override
-    public void onDataReceived(byte[] bytes) {
+    public void onDataReceived(byte[] bytes)   {
         runOnUiThread(() -> Log.i("SpdSerial", Arrays.toString(bytes)));
     }
 
