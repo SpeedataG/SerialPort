@@ -357,15 +357,9 @@ public abstract class AbstractSerialSendThread extends HandlerThread {
      */
     public void sendBytes(byte[] bytes) {
         if (mSendingHandler != null) {
-            try {
-                Message message = Message.obtain();
-                message.obj = bytes;
-                mSendingHandler.sendMessage(message);
-            } catch (Exception e) {
-                e.printStackTrace();
-                mSendingHandler.removeCallbacksAndMessages(null);
-            }
-
+            Message message = Message.obtain();
+            message.obj = bytes;
+            mSendingHandler.sendMessage(message);
         }
     }
 }
