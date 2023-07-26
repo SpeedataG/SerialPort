@@ -503,7 +503,7 @@ Java_com_spd_hardware_SerialManager_nativeClose(JNIEnv *env, jobject thiz) {
     try{
         close(getFd(env,thiz));
     } catch (...) {
-        return -1;
+
     }
 }
 
@@ -513,6 +513,6 @@ Java_com_spd_hardware_SerialManager_clearBuffer(JNIEnv *env, jobject thiz) {
     try{
        tcflush(getFd(env,thiz),TCIFLUSH);
     } catch (...) {
-        return -1;
+
     }
 }
