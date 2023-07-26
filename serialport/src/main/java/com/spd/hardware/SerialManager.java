@@ -501,7 +501,9 @@ public class SerialManager {
      * 清除串口缓冲区
      */
     public void clearSerialBuffer() {
-        clearBuffer();
+        if (fileDescriptor != null) {
+            clearBuffer();
+        }
     }
 
     private void stopReadThread() {

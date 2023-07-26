@@ -500,11 +500,19 @@ static int getFd(JNIEnv *env, jobject thiz) {
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_spd_hardware_SerialManager_nativeClose(JNIEnv *env, jobject thiz) {
-    close(getFd(env,thiz));
+    try{
+        close(getFd(env,thiz));
+    } catch (...) {
+        return -1;
+    }
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_spd_hardware_SerialManager_clearBuffer(JNIEnv *env, jobject thiz) {
-    tcflush(getFd(env,thiz),TCIFLUSH);
+    try{
+       tcflush(getFd(env,thiz),TCIFLUSH);
+    } catch (...) {
+        return -1;
+    }
 }
