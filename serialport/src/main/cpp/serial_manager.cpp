@@ -285,9 +285,6 @@
 #include <termios.h>
 #include <cstdlib>
 
-#include "android/log.h"
-
-
 static speed_t getBaudRate(jint baudRate) {
     switch (baudRate) {
         case 0:
@@ -483,36 +480,32 @@ Java_com_spd_hardware_SerialManager_nativeOpen(JNIEnv *env, jobject/* thiz */, j
 }
 
 static int getFd(JNIEnv *env, jobject thiz) {
-    try {
-        jclass serialPortManager = env->GetObjectClass(thiz);
-        jclass fileDescriptorClass = env->FindClass("java/io/FileDescriptor");
-        jfieldID mFdID = env->GetFieldID(serialPortManager, "fileDescriptor", "Ljava/io/FileDescriptor;");
-        jfieldID descriptorId = env->GetFieldID(fileDescriptorClass, "descriptor", "I");
-        jobject mFd = env->GetObjectField(thiz, mFdID);
-        jint descriptor = env->GetIntField(mFd, descriptorId);
-        return descriptor;
-    } catch (...) {
+    jclass serialPortManager = env->GetObjectClass(thiz);
+    jclass fileDescriptorClass = env->FindClass("java/io/FileDescriptor");
+    jfieldID mFdID = env->GetFieldID(serialPortManager, "fileDescriptor", "Ljava/io/FileDescriptor;");
+    if (mFdID == nullptr) {
         return -1;
     }
-
+    jfieldID descriptorId = env->GetFieldID(fileDescriptorClass, "descriptor", "I");
+    jobject mFd = env->GetObjectField(thiz, mFdID);
+    jint descriptor = env->GetIntField(mFd, descriptorId);
+    return descriptor;
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_spd_hardware_SerialManager_nativeClose(JNIEnv *env, jobject thiz) {
-    try{
-        close(getFd(env,thiz));
-    } catch (...) {
-
+    int fd = getFd(env, thiz);
+    if (fd != -1) {
+        close(fd);
     }
 }
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_com_spd_hardware_SerialManager_clearBuffer(JNIEnv *env, jobject thiz) {
-    try{
-       tcflush(getFd(env,thiz),TCIFLUSH);
-    } catch (...) {
-
+    int fd = getFd(env, thiz);
+    if (fd != -1) {
+        tcflush(getFd(env, thiz), TCIFLUSH);
     }
 }
