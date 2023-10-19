@@ -297,22 +297,24 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author :Reginer  2022/2/23 16:33.
  * 联系方式:QQ:282921012
  * 功能描述:串口操作类
  */
+@SuppressWarnings("unused")
 public class SerialManager {
     private FileDescriptor fileDescriptor;
     private FileInputStream mFileInputStream;
     private FileOutputStream mFileOutputStream;
-    private ISerialPortListener iSerialPortListener;
     private AbstractSerialReadThread mReadThread;
     private AbstractSerialSendThread mSendThread;
 
+    private final Set<ISerialPortListener> iSerialPortListenerList = new HashSet<>();
 
     private SerialConfig mSerialConfig;
 
@@ -358,7 +360,7 @@ public class SerialManager {
      * @param listener 回调
      */
     public void open(SerialConfig config, ISerialPortListener listener) {
-        iSerialPortListener = listener;
+        iSerialPortListenerList.add(listener);
         try {
             fileDescriptor = nativeOpen(config.getDevice(),
                     config.getSpeed(),
@@ -373,21 +375,40 @@ public class SerialManager {
                 startReadThread();
             }
             startSendThread();
-            if (iSerialPortListener != null) {
+            for (ISerialPortListener iSerialPortListener : iSerialPortListenerList) {
                 iSerialPortListener.onOpenSuccess(new File(config.getDevice()));
             }
 
         } catch (Exception e) {
-            if (iSerialPortListener != null) {
+            for (ISerialPortListener iSerialPortListener : iSerialPortListenerList) {
                 iSerialPortListener.onOpenFailed(e);
             }
         }
     }
 
     /**
+     * 添加串口数据回调
+     *
+     * @param serialPortListener 串口数据回调
+     */
+    public void addSerialListener(ISerialPortListener serialPortListener) {
+        iSerialPortListenerList.add(serialPortListener);
+    }
+
+    /**
+     * 移除串口数据回调
+     *
+     * @param serialPortListener 串口数据回调
+     */
+    public void removeSerialListener(ISerialPortListener serialPortListener) {
+        iSerialPortListenerList.remove(serialPortListener);
+    }
+
+    /**
      * 关闭串口
      */
     public void close() {
+        iSerialPortListenerList.clear();
         if (fileDescriptor != null) {
             nativeClose();
             fileDescriptor = null;
@@ -424,7 +445,7 @@ public class SerialManager {
         mReadThread = new AbstractSerialReadThread(mFileInputStream, mSerialConfig) {
             @Override
             public void onDataReceived(byte[] bytes) {
-                if (iSerialPortListener != null) {
+                for (ISerialPortListener iSerialPortListener : iSerialPortListenerList) {
                     iSerialPortListener.onDataReceived(bytes);
                 }
             }
@@ -436,7 +457,7 @@ public class SerialManager {
         mSendThread = new AbstractSerialSendThread(mFileOutputStream) {
             @Override
             public void onDataSend(byte[] bytes) {
-                if (iSerialPortListener != null) {
+                for (ISerialPortListener iSerialPortListener : iSerialPortListenerList) {
                     iSerialPortListener.onDataSend(bytes);
                 }
             }
