@@ -402,11 +402,11 @@ public class SerialManager {
      * @return 串口列表
      */
     public List<String> getSerialPorts() {
-        final List<String> drivers = SerialPortUtil.readFile2List("/proc/tty/drivers");
-        if (drivers.size() == 0) {
-            return Collections.emptyList();
-        }
         final List<String> serialPorts = new ArrayList<>();
+        final List<String> drivers = SerialPortUtil.readFile2List("/proc/tty/drivers");
+        if (drivers.isEmpty()) {
+            return serialPorts;
+        }
         for (String readLine : drivers) {
             final String[] fields = readLine.split(" +");
             if ((fields.length >= 5) && TextUtils.equals(fields[fields.length - 1], "serial")) {
@@ -504,6 +504,15 @@ public class SerialManager {
         if (fileDescriptor != null) {
             clearBuffer();
         }
+    }
+
+    /**
+     * 获取串口是否打开
+     *
+     * @return 串口打开状态
+     */
+    public boolean serialOpened() {
+        return fileDescriptor != null;
     }
 
     private void stopReadThread() {
